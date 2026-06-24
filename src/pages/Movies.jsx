@@ -10,16 +10,21 @@ const Movies = () => {
   const [moviesByCategory, setMoviesByCategory] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch movie data for all selected genres
+  // List of all 8 categories
+  const allCategories = [
+    "Action", "Comedy", "Drama", "Music", 
+    "Sports", "Thriller", "Fantasy", "Romance"
+  ];
+
+  // Fetch movie data for ALL genres so user can see all posters
   useEffect(() => {
     const fetchAllMovies = async () => {
       setLoading(true);
       try {
         const results = {};
         await Promise.all(
-          categories.map(async (category) => {
+          allCategories.map(async (category) => {
             const list = await searchMovieByGenre(category, apiKeys.omdb);
-            // Slice to 4 movies per category to match the grid of 4 in the screenshot
             results[category] = list.slice(0, 4);
           })
         );
@@ -31,12 +36,8 @@ const Movies = () => {
       }
     };
 
-    if (categories.length > 0) {
-      fetchAllMovies();
-    } else {
-      setLoading(false);
-    }
-  }, [categories, apiKeys.omdb]);
+    fetchAllMovies();
+  }, [apiKeys.omdb]);
 
   return (
     <div className="min-h-screen bg-[#07070a] text-white flex flex-col font-sans">
@@ -70,7 +71,7 @@ const Movies = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-10">
-            {categories.map((category) => {
+            {allCategories.map((category) => {
               const movies = moviesByCategory[category] || [];
               if (movies.length === 0) return null;
               
