@@ -7,6 +7,7 @@ const Register = () => {
   const setUser = useStore((state) => state.setUser);
   const navigate = useNavigate();
 
+  const [isSignInMode, setIsSignInMode] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -52,12 +53,69 @@ const Register = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
+  const validateSignIn = () => {
+    const tempErrors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.username.trim()) {
+      tempErrors.username = "Username field cannot be left blank.";
+    }
+    if (!formData.email.trim()) {
+      tempErrors.email = "Email field cannot be left blank.";
+    } else if (!emailPattern.test(formData.email)) {
+      tempErrors.email = "Please input a valid email formatting schema.";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleFormSubmission = (event) => {
     event.preventDefault();
-    if (validateForm()) {
-      const { shareData, ...userDetails } = formData;
-      setUser(userDetails);
-      navigate("/categories");
+    if (isSignInMode) {
+      if (validateSignIn()) {
+        const storedUser = JSON.parse(localStorage.getItem("super_app_user") || "null");
+        
+        if (
+          storedUser &&
+          storedUser.username &&
+          storedUser.username.toLowerCase() === formData.username.trim().toLowerCase()
+        ) {
+          setUser(storedUser);
+          const storedCategories = JSON.parse(localStorage.getItem("super_app_categories") || "[]");
+          if (storedCategories.length >= 3) {
+            navigate("/dashboard");
+          } else {
+            navigate("/categories");
+          }
+        } else if (formData.username.trim().toLowerCase() === "demo") {
+          const demoUser = {
+            name: "Demo User",
+            username: "demo",
+            email: formData.email.trim(),
+            mobile: "9876543210",
+          };
+          setUser(demoUser);
+          
+          const storedCategories = JSON.parse(localStorage.getItem("super_app_categories") || "[]");
+          if (storedCategories.length < 3) {
+            const demoCategories = ["Action", "Comedy", "Drama"];
+            localStorage.setItem("super_app_categories", JSON.stringify(demoCategories));
+            useStore.getState().setCategories(demoCategories);
+          }
+          navigate("/dashboard");
+        } else {
+          setErrors({
+            username: "Username not found. Try 'demo' or register a new account.",
+          });
+        }
+      }
+    } else {
+      if (validateForm()) {
+        const { shareData, ...userDetails } = formData;
+        setUser(userDetails);
+        navigate("/categories");
+      }
     }
   };
 
@@ -103,30 +161,32 @@ const Register = () => {
               SUPER APP
             </h2>
             <h3 className="text-gray-400 text-sm font-medium tracking-wide">
-              Create your new account
+              {isSignInMode ? "Sign in to your account" : "Create your new account"}
             </h3>
           </div>
 
           <form onSubmit={handleFormSubmission} className="flex flex-col gap-4">
             {/* Name */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</label>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={`w-full bg-[#18181b] border ${errors.name ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
-              />
-              {errors.name && <span className="text-red-500 text-xs font-semibold">{errors.name}</span>}
-            </div>
+            {!isSignInMode && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</label>
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className={`w-full bg-[#18181b] border ${errors.name ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
+                />
+                {errors.name && <span className="text-red-500 text-xs font-semibold">{errors.name}</span>}
+              </div>
+            )}
 
             {/* Username */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Username</label>
               <input
                 type="text"
-                placeholder="alphanumeric_only"
+                placeholder={isSignInMode ? "e.g. demo" : "alphanumeric_only"}
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className={`w-full bg-[#18181b] border ${errors.username ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
@@ -148,42 +208,78 @@ const Register = () => {
             </div>
 
             {/* Mobile */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Mobile Number</label>
-              <input
-                type="text"
-                placeholder="10-digit number"
-                value={formData.mobile}
-                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                className={`w-full bg-[#18181b] border ${errors.mobile ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
-              />
-              {errors.mobile && <span className="text-red-500 text-xs font-semibold">{errors.mobile}</span>}
-            </div>
+            {!isSignInMode && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Mobile Number</label>
+                <input
+                  type="text"
+                  placeholder="10-digit number"
+                  value={formData.mobile}
+                  onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                  className={`w-full bg-[#18181b] border ${errors.mobile ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
+                />
+                {errors.mobile && <span className="text-red-500 text-xs font-semibold">{errors.mobile}</span>}
+              </div>
+            )}
 
             {/* Checkbox */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              <label className="flex items-start gap-3 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={formData.shareData}
-                  onChange={(e) => setFormData({ ...formData, shareData: e.target.checked })}
-                  className="w-4 h-4 mt-0.5 rounded border-gray-600 bg-[#18181b] accent-accentNeon cursor-pointer flex-shrink-0"
-                />
-                <span className="text-xs text-gray-400 leading-relaxed">
-                  Share my registration data with Superapp
-                </span>
-              </label>
-              {errors.shareData && <span className="text-red-500 text-xs font-semibold">{errors.shareData}</span>}
-            </div>
+            {!isSignInMode && (
+              <div className="flex flex-col gap-1.5 mt-1">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.shareData}
+                    onChange={(e) => setFormData({ ...formData, shareData: e.target.checked })}
+                    className="w-4 h-4 mt-0.5 rounded border-gray-600 bg-[#18181b] accent-accentNeon cursor-pointer flex-shrink-0"
+                  />
+                  <span className="text-xs text-gray-400 leading-relaxed">
+                    Share my registration data with Superapp
+                  </span>
+                </label>
+                {errors.shareData && <span className="text-red-500 text-xs font-semibold">{errors.shareData}</span>}
+              </div>
+            )}
 
             {/* Submit */}
             <button
               type="submit"
               className="w-full bg-accentNeon text-black font-bold text-sm rounded-full py-3.5 px-6 mt-3 hover:scale-[1.02] active:scale-[0.97] transition-all duration-300 shadow-[0_0_15px_rgba(29,248,169,0.25)]"
             >
-              SIGN UP
+              {isSignInMode ? "SIGN IN" : "SIGN UP"}
             </button>
           </form>
+
+          <div className="text-center mt-2">
+            {isSignInMode ? (
+              <p className="text-xs text-gray-400 font-semibold">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignInMode(false);
+                    setErrors({});
+                  }}
+                  className="text-accentNeon hover:underline font-black cursor-pointer"
+                >
+                  Sign Up
+                </button>
+              </p>
+            ) : (
+              <p className="text-xs text-gray-400 font-semibold">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignInMode(true);
+                    setErrors({});
+                  }}
+                  className="text-accentNeon hover:underline font-black cursor-pointer"
+                >
+                  Sign In
+                </button>
+              </p>
+            )}
+          </div>
 
           <p className="text-[11px] text-gray-600 leading-relaxed text-center mt-2">
             By signing up, you agree to Superapp{" "}
