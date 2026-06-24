@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import { searchMovieByGenre } from "../services/apiServices";
+import MovieModal from "../components/MovieModal";
 
 const Movies = () => {
   const navigate = useNavigate();
@@ -9,21 +10,16 @@ const Movies = () => {
 
   const [moviesByCategory, setMoviesByCategory] = useState({});
   const [loading, setLoading] = useState(true);
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
 
-  // List of all 8 categories
-  const allCategories = [
-    "Action", "Comedy", "Drama", "Music", 
-    "Sports", "Thriller", "Fantasy", "Romance"
-  ];
-
-  // Fetch movie data for ALL genres so user can see all posters
+  // Fetch movie data for the selected categories
   useEffect(() => {
-    const fetchAllMovies = async () => {
+    const fetchSelectedMovies = async () => {
       setLoading(true);
       try {
         const results = {};
         await Promise.all(
-          allCategories.map(async (category) => {
+          categories.map(async (category) => {
             const list = await searchMovieByGenre(category, apiKeys.omdb);
             results[category] = list.slice(0, 4);
           })
@@ -36,8 +32,13 @@ const Movies = () => {
       }
     };
 
-    fetchAllMovies();
-  }, [apiKeys.omdb]);
+    if (categories && categories.length > 0) {
+      fetchSelectedMovies();
+    } else {
+      setMoviesByCategory({});
+      setLoading(false);
+    }
+  }, [categories, apiKeys.omdb]);
 
   return (
     <div className="min-h-screen bg-[#07070a] text-white flex flex-col font-sans">
@@ -71,7 +72,7 @@ const Movies = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-10">
-            {allCategories.map((category) => {
+            {categories.map((category) => {
               const movies = moviesByCategory[category] || [];
               if (movies.length === 0) return null;
               
@@ -87,6 +88,7 @@ const Movies = () => {
                     {movies.map((movie, idx) => (
                       <div
                         key={movie.imdbID || idx}
+                        onClick={() => setSelectedMovieId(movie.imdbID)}
                         className="w-full aspect-[16/9] rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg"
                       >
                         <img 
@@ -103,6 +105,15 @@ const Movies = () => {
           </div>
         )}
       </main>
+
+      {/* Movie Details Modal */}
+      {selectedMovieId && (
+        <MovieModal 
+          imdbID={selectedMovieId} 
+          apiKey={apiKeys.omdb} 
+          onClose={() => setSelectedMovieId(null)} 
+        />
+      )}
 
     </div>
   );
