@@ -161,17 +161,25 @@ const Categories = () => {
                 Minimum 3 categories required
               </div>
             )}
-            <button
-              onClick={handleContinue}
-              disabled={categories.length < 3}
-              className={`w-full font-bold text-base py-3.5 px-8 rounded-full transition-all duration-300 select-none ${
-                categories.length >= 3
-                  ? "bg-accentNeon text-black hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_15px_rgba(29,248,169,0.3)]"
-                  : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/10"
-              }`}
-            >
-              Continue
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => navigate("/")}
+                className="flex-1 font-bold text-base py-3.5 px-6 rounded-full border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-300 select-none text-center"
+              >
+                ← Back to Register
+              </button>
+              <button
+                onClick={handleContinue}
+                disabled={categories.length < 3}
+                className={`flex-1 font-bold text-base py-3.5 px-6 rounded-full transition-all duration-300 select-none ${
+                  categories.length >= 3
+                    ? "bg-accentNeon text-black hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_15px_rgba(29,248,169,0.3)]"
+                    : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/10"
+                }`}
+              >
+                Continue →
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -214,17 +222,25 @@ const Categories = () => {
                 Select {3 - categories.length} more to continue
               </p>
             )}
-            <button
-              onClick={handleContinue}
-              disabled={categories.length < 3}
-              className={`w-full font-bold text-sm py-3.5 rounded-full transition-all duration-300 select-none ${
-                categories.length >= 3
-                  ? "bg-accentNeon text-black active:scale-[0.97] shadow-[0_0_15px_rgba(29,248,169,0.3)]"
-                  : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/10"
-              }`}
-            >
-              {categories.length >= 3 ? `Continue (${categories.length} selected)` : `Continue (${categories.length}/3 selected)`}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate("/")}
+                className="flex-1 font-bold text-xs py-3 rounded-full border border-white/10 text-gray-300 active:scale-[0.97] transition-all select-none"
+              >
+                ← Back
+              </button>
+              <button
+                onClick={handleContinue}
+                disabled={categories.length < 3}
+                className={`flex-1 font-bold text-xs py-3 rounded-full transition-all duration-300 select-none ${
+                  categories.length >= 3
+                    ? "bg-accentNeon text-black active:scale-[0.97] shadow-[0_0_15px_rgba(29,248,169,0.3)]"
+                    : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/10"
+                }`}
+              >
+                {categories.length >= 3 ? `Continue (${categories.length})` : `Continue (${categories.length}/3)`}
+              </button>
+            </div>
           </div>
 
           {/* Bottom padding for mobile sticky bar */}

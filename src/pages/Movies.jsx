@@ -51,12 +51,20 @@ const Movies = () => {
         >
           SUPERAPP
         </span>
-        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent hover:border-green-400 transition-all cursor-pointer">
-          <img 
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name || 'User'}`} 
-            alt="Profile Avatar" 
-            className="w-full h-full object-cover bg-indigo-500"
-          />
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 font-bold text-xs sm:text-sm rounded-full py-2 px-4 sm:px-5 hover:scale-[1.02] active:scale-[0.98] transition-all select-none"
+          >
+            ← Back to Dashboard
+          </button>
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent hover:border-green-400 transition-all cursor-pointer">
+            <img 
+              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name || 'User'}`} 
+              alt="Profile Avatar" 
+              className="w-full h-full object-cover bg-indigo-500"
+            />
+          </div>
         </div>
       </header>
 

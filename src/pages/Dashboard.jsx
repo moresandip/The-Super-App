@@ -277,12 +277,19 @@ const Dashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
+          {/* Back to Categories */}
+          <button
+            onClick={() => navigate("/categories")}
+            className="bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 font-bold text-xs sm:text-sm rounded-full py-2 px-3 sm:px-5 hover:scale-[1.02] active:scale-[0.98] transition-all select-none"
+          >
+            ← Back
+          </button>
           {/* Browse Movies — text hidden on tiny screens */}
           <button
             onClick={() => navigate("/movies")}
-            className="bg-accentNeon text-black font-bold text-xs sm:text-sm rounded-full py-2 px-3 sm:px-5 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md"
+            className="bg-accentNeon text-black font-bold text-xs sm:text-sm rounded-full py-2 px-3 sm:px-5 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none"
           >
-            <span className="hidden xs:inline">Browse </span>Movies
+            Movies →
           </button>
           <button
             onClick={handleLogOut}
