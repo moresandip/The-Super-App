@@ -70,25 +70,48 @@ const Register = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
+  const handleUsernameChange = (val) => {
+    setFormData((prev) => {
+      const updated = { ...prev, username: val };
+      
+      // Auto-fill check in Sign Up/Register mode
+      if (val.trim() && !isSignInMode) {
+        try {
+          const db = JSON.parse(localStorage.getItem("super_app_users_db") || "{}");
+          const match = db[val.trim().toLowerCase()];
+          if (match && match.user) {
+            updated.name = match.user.name || "";
+            updated.email = match.user.email || "";
+            updated.mobile = match.user.mobile || "";
+          }
+        } catch (e) {
+          console.error("Autofill lookup failure:", e);
+        }
+      }
+      return updated;
+    });
+  };
+
   const handleFormSubmission = (event) => {
     event.preventDefault();
     if (isSignInMode) {
       if (validateSignIn()) {
-        const storedUser = JSON.parse(localStorage.getItem("super_app_user") || "null");
+        const db = JSON.parse(localStorage.getItem("super_app_users_db") || "{}");
+        const usernameKey = formData.username.trim().toLowerCase();
         
-        if (
-          storedUser &&
-          storedUser.username &&
-          storedUser.username.toLowerCase() === formData.username.trim().toLowerCase()
-        ) {
-          setUser(storedUser);
-          const storedCategories = JSON.parse(localStorage.getItem("super_app_categories") || "[]");
-          if (storedCategories.length >= 3) {
+        if (db[usernameKey]) {
+          const userRecord = db[usernameKey];
+          setUser(userRecord.user);
+          useStore.getState().setCategories(userRecord.categories);
+          useStore.getState().setNotes(userRecord.notes);
+          useStore.getState().setApiKeys(userRecord.apiKeys);
+          
+          if (userRecord.categories.length >= 3) {
             navigate("/dashboard");
           } else {
             navigate("/categories");
           }
-        } else if (formData.username.trim().toLowerCase() === "demo") {
+        } else if (usernameKey === "demo") {
           const demoUser = {
             name: "Demo User",
             username: "demo",
@@ -97,12 +120,8 @@ const Register = () => {
           };
           setUser(demoUser);
           
-          const storedCategories = JSON.parse(localStorage.getItem("super_app_categories") || "[]");
-          if (storedCategories.length < 3) {
-            const demoCategories = ["Action", "Comedy", "Drama"];
-            localStorage.setItem("super_app_categories", JSON.stringify(demoCategories));
-            useStore.getState().setCategories(demoCategories);
-          }
+          const demoCategories = ["Action", "Comedy", "Drama"];
+          useStore.getState().setCategories(demoCategories);
           navigate("/dashboard");
         } else {
           setErrors({
@@ -113,8 +132,25 @@ const Register = () => {
     } else {
       if (validateForm()) {
         const { shareData, ...userDetails } = formData;
-        setUser(userDetails);
-        navigate("/categories");
+        const db = JSON.parse(localStorage.getItem("super_app_users_db") || "{}");
+        const usernameKey = userDetails.username.trim().toLowerCase();
+        
+        if (db[usernameKey]) {
+          const userRecord = db[usernameKey];
+          setUser(userRecord.user);
+          useStore.getState().setCategories(userRecord.categories);
+          useStore.getState().setNotes(userRecord.notes);
+          useStore.getState().setApiKeys(userRecord.apiKeys);
+          
+          if (userRecord.categories.length >= 3) {
+            navigate("/dashboard");
+          } else {
+            navigate("/categories");
+          }
+        } else {
+          setUser(userDetails);
+          navigate("/categories");
+        }
       }
     }
   };
@@ -188,7 +224,7 @@ const Register = () => {
                 type="text"
                 placeholder={isSignInMode ? "e.g. demo" : "alphanumeric_only"}
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) => handleUsernameChange(e.target.value)}
                 className={`w-full bg-[#18181b] border ${errors.username ? "border-red-500" : "border-white/10 focus:border-accentNeon"} rounded-xl py-3 px-4 text-sm font-medium text-white placeholder-gray-500 outline-none transition-all duration-300`}
               />
               {errors.username && <span className="text-red-500 text-xs font-semibold">{errors.username}</span>}
