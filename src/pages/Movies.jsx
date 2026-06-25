@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
-import { searchMovieByGenre } from "../services/apiServices";
+import { searchMovieByGenre } from "../services/movieApi";
+import MovieCard from "../components/MovieCard";
 import MovieModal from "../components/MovieModal";
 
 const Movies = () => {
@@ -94,17 +95,11 @@ const Movies = () => {
                   {/* Grid of 4 Posters */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                     {movies.map((movie, idx) => (
-                      <div
+                      <MovieCard
                         key={movie.imdbID || idx}
+                        movie={movie}
                         onClick={() => setSelectedMovieId(movie.imdbID)}
-                        className="w-full aspect-[16/9] rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg"
-                      >
-                        <img 
-                          src={movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop"} 
-                          alt={movie.Title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>

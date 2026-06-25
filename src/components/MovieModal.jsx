@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchMovieDetails } from "../services/apiServices";
+import { fetchMovieDetails } from "../services/movieApi";
 
 const MovieModal = ({ imdbID, apiKey, onClose }) => {
   const [movie, setMovie] = useState(null);

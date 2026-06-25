@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
+import CategoryCard from "../components/CategoryCard";
 
 const icons = {
   Action: (
@@ -179,32 +180,15 @@ const Categories = () => {
         <div className="flex-1 flex flex-col gap-5">
           {/* 2 cols on mobile → 3 cols on sm → 4 cols on lg */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-            {categoryDetails.map((cat) => {
-              const isSelected = categories.includes(cat.id);
-              return (
-                <div
-                  key={cat.id}
-                  onClick={() => handleToggle(cat.id)}
-                  className={`relative rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between min-h-[130px] sm:min-h-[155px] lg:min-h-[170px] cursor-pointer select-none transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97] ${cat.color} ${cat.textColor} ${
-                    isSelected
-                      ? "ring-4 ring-accentNeon shadow-[0_0_20px_rgba(29,248,169,0.25)]"
-                      : "opacity-90 hover:opacity-100 shadow-md"
-                  }`}
-                >
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold font-heading leading-tight">
-                    {cat.label}
-                  </h3>
-                  <div className="flex justify-end items-end">{icons[cat.id]}</div>
-                  {isSelected && (
-                    <div className="absolute top-3 right-3 bg-accentNeon text-black rounded-full p-1 border border-black/10">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {categoryDetails.map((cat) => (
+              <CategoryCard
+                key={cat.id}
+                category={cat}
+                isSelected={categories.includes(cat.id)}
+                onToggle={handleToggle}
+                icon={icons[cat.id]}
+              />
+            ))}
           </div>
 
           {/* MOBILE — sticky bottom Continue bar */}
